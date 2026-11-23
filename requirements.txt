@@ -1,0 +1,12 @@
+Flask>=3.1,<4
+pyarrow>=18,<27
+fastjsonschema>=2.21,<3
+tzdata>=2024.1
+pandas>=2.2,<4
+numpy>=1.26,<3
+scipy>=1.11.4,<2
+scikit-learn>=1.5,<2
+MiniSom>=2.3.6,<2.4
+mlxtend>=0.23.4,<0.26
+scikit-fuzzy>=0.5,<0.6
+networkx>=3,<4

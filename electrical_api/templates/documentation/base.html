@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · ElectricalAnalysisAPI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='documentation.css') }}">
+  <script src="{{ url_for('static', filename='documentation.js') }}" defer></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Перейти до вмісту</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="{{ url_for('documentation.reference') }}">
+        <span class="brand-mark" aria-hidden="true"></span>ElectricalAnalysisAPI
+      </a>
+      <nav class="top-links" aria-label="Документація">
+        <a href="{{ url_for('documentation.reference') }}"{% if request.endpoint == 'documentation.reference' %} aria-current="page"{% endif %}>Довідник API</a>
+        <a href="{{ url_for('documentation.input_data') }}"{% if request.endpoint == 'documentation.input_data' %} aria-current="page"{% endif %}>Вхідні дані</a>
+        <a href="{{ url_for('documentation.swagger') }}"{% if request.endpoint == 'documentation.swagger' %} aria-current="page"{% endif %}>Swagger UI</a>
+      </nav>
+      <a class="spec-link" href="{{ url_for('specification') }}">OpenAPI JSON <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  {% block layout %}
+  <div class="docs-layout">
+    <aside class="sidebar">
+      <nav class="toc" aria-label="На цій сторінці">
+        <p class="toc-label">На цій сторінці</p>
+        {% block contents %}{% endblock %}
+      </nav>
+    </aside>
+    <main id="main-content">
+      {% block body %}{% endblock %}
+    </main>
+  </div>
+  {% endblock %}
+</body>
+</html>

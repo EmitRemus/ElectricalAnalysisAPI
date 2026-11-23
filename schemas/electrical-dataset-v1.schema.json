@@ -1,0 +1,464 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Electrical Dataset v1 — JSON or NDJSON header / record",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/dataset"
+    },
+    {
+      "$ref": "#/$defs/header"
+    },
+    {
+      "$ref": "#/$defs/record"
+    }
+  ],
+  "$defs": {
+    "meter": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "meter"
+        },
+        "meter_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customer_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tariff": {
+          "type": "string",
+          "minLength": 1
+        },
+        "electric_heating": {
+          "type": "boolean"
+        },
+        "connection_year": {
+          "type": "integer"
+        },
+        "years_connected": {
+          "type": "integer"
+        },
+        "district": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "record_type",
+        "meter_id",
+        "customer_type",
+        "tariff",
+        "electric_heating",
+        "connection_year",
+        "district"
+      ],
+      "additionalProperties": false
+    },
+    "reading": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "reading"
+        },
+        "meter_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interval_start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "interval_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "energy": {
+          "type": "number"
+        },
+        "energy_unit": {
+          "enum": [
+            "Wh",
+            "kWh"
+          ]
+        }
+      },
+      "required": [
+        "record_type",
+        "meter_id",
+        "interval_start",
+        "interval_minutes",
+        "received_at",
+        "energy",
+        "energy_unit"
+      ],
+      "additionalProperties": false
+    },
+    "customer_profile": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "customer_profile"
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "avg_daily_kwh": {
+          "type": "number"
+        },
+        "night_share": {
+          "type": "number"
+        },
+        "seasonality": {
+          "type": "number"
+        },
+        "weekend_ratio": {
+          "type": "number"
+        },
+        "stability": {
+          "type": "number"
+        },
+        "annual_charge_uah": {
+          "type": "number"
+        },
+        "avg_price_uah_kwh": {
+          "type": "number"
+        },
+        "voltage_dev_mean": {
+          "type": "number"
+        },
+        "loss_index_mean": {
+          "type": "number"
+        },
+        "tariff": {
+          "type": "string",
+          "minLength": 1
+        },
+        "meter_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "district": {
+          "type": "string",
+          "minLength": 1
+        },
+        "connection_year": {
+          "type": "integer"
+        },
+        "churned": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "record_type",
+        "customer_id",
+        "avg_daily_kwh",
+        "night_share",
+        "seasonality",
+        "weekend_ratio",
+        "stability",
+        "annual_charge_uah",
+        "avg_price_uah_kwh",
+        "voltage_dev_mean",
+        "loss_index_mean",
+        "tariff",
+        "meter_type",
+        "district",
+        "connection_year"
+      ],
+      "additionalProperties": false
+    },
+    "customer_event": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "customer_event"
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "event_type": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "record_type",
+        "customer_id",
+        "event_at",
+        "event_type"
+      ],
+      "additionalProperties": false
+    },
+    "equipment": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "equipment"
+        },
+        "equipment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cohort": {
+          "type": "string",
+          "minLength": 1
+        },
+        "equipment_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "voltage_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "region": {
+          "type": "string",
+          "minLength": 1
+        },
+        "install_year": {
+          "type": "integer"
+        },
+        "last_overhaul_year": {
+          "type": "integer"
+        },
+        "outdoor": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "record_type",
+        "equipment_id",
+        "cohort",
+        "equipment_type",
+        "voltage_class",
+        "region",
+        "install_year",
+        "last_overhaul_year",
+        "outdoor"
+      ],
+      "additionalProperties": false
+    },
+    "equipment_observation": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "equipment_observation"
+        },
+        "equipment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "enum": [
+            "training",
+            "prediction"
+          ]
+        },
+        "load_mean": {
+          "type": "number"
+        },
+        "load_std": {
+          "type": "number"
+        },
+        "load_stability": {
+          "type": "number"
+        },
+        "load_weekend_ratio": {
+          "type": "number"
+        },
+        "temp_rise_mean": {
+          "type": "number"
+        },
+        "temp_rise_std": {
+          "type": "number"
+        },
+        "temp_rise_median": {
+          "type": "number"
+        },
+        "pd_mean": {
+          "type": "number"
+        },
+        "pd_std": {
+          "type": "number"
+        },
+        "pd_stability": {
+          "type": "number"
+        },
+        "pd_per_load": {
+          "type": "number"
+        },
+        "temp_per_load": {
+          "type": "number"
+        },
+        "work_order_opened": {
+          "type": "boolean"
+        },
+        "failed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "record_type",
+        "equipment_id",
+        "role",
+        "load_mean",
+        "load_std",
+        "load_stability",
+        "load_weekend_ratio",
+        "temp_rise_mean",
+        "temp_rise_std",
+        "temp_rise_median",
+        "pd_mean",
+        "pd_std",
+        "pd_stability",
+        "pd_per_load",
+        "temp_per_load",
+        "work_order_opened"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "training"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "failed"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "failed"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "service_case": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "service_case"
+        },
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reactive_energy_mvarh": {
+          "type": "number"
+        },
+        "heat_energy_gcal": {
+          "type": "number"
+        },
+        "contracted_power_kw": {
+          "type": "number"
+        },
+        "outage_hours": {
+          "type": "number"
+        },
+        "service_cost_kuah": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "record_type",
+        "case_id",
+        "reactive_energy_mvarh",
+        "heat_energy_gcal",
+        "contracted_power_kw",
+        "outage_hours"
+      ],
+      "additionalProperties": false
+    },
+    "record": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/meter"
+        },
+        {
+          "$ref": "#/$defs/reading"
+        },
+        {
+          "$ref": "#/$defs/customer_profile"
+        },
+        {
+          "$ref": "#/$defs/customer_event"
+        },
+        {
+          "$ref": "#/$defs/equipment"
+        },
+        {
+          "$ref": "#/$defs/equipment_observation"
+        },
+        {
+          "$ref": "#/$defs/service_case"
+        }
+      ]
+    },
+    "header": {
+      "type": "object",
+      "properties": {
+        "record_type": {
+          "const": "dataset"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "source_timezone": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "record_type",
+        "schema_version"
+      ],
+      "additionalProperties": false
+    },
+    "dataset": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "source_timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/record"
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "records"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

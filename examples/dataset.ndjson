@@ -1,0 +1,9 @@
+{"record_type":"dataset","schema_version":"1.0","source_timezone":"Europe/Kyiv"}
+{"record_type":"meter","meter_id":"UA100035","customer_type":"small_business","tariff":"single","electric_heating":false,"connection_year":1989,"years_connected":37,"district":"Obolon"}
+{"record_type":"reading","meter_id":"UA100035","interval_start":"2026-01-15T08:00:00+02:00","interval_minutes":60,"received_at":"2026-01-15T09:02:00+02:00","energy":1.42,"energy_unit":"kWh"}
+{"record_type":"reading","meter_id":"UA100035","interval_start":"2026-01-15T08:00:00+02:00","interval_minutes":60,"received_at":"2026-01-15T09:07:00+02:00","energy":1.45,"energy_unit":"kWh"}
+{"record_type":"customer_profile","customer_id":"AB10002","avg_daily_kwh":1,"night_share":1,"seasonality":1,"weekend_ratio":1,"stability":1,"annual_charge_uah":1,"avg_price_uah_kwh":1,"voltage_dev_mean":1,"loss_index_mean":1,"tariff":"business","meter_type":"SMART_B","district":"west","connection_year":2005,"churned":false}
+{"record_type":"customer_event","customer_id":"AB10002","event_at":"2025-09-06T16:00:00+03:00","event_type":"complaint"}
+{"record_type":"equipment","equipment_id":"EQ100002","cohort":"history","equipment_type":"switchgear","voltage_class":"kv10","region":"west","install_year":1993,"last_overhaul_year":2020,"outdoor":true}
+{"record_type":"equipment_observation","equipment_id":"EQ100002","role":"training","load_mean":1,"load_std":1,"load_stability":1,"load_weekend_ratio":1,"temp_rise_mean":1,"temp_rise_std":1,"temp_rise_median":1,"pd_mean":1,"pd_std":1,"pd_stability":1,"pd_per_load":1,"temp_per_load":1,"work_order_opened":false,"failed":false}
+{"record_type":"service_case","case_id":"sample-001:1","reactive_energy_mvarh":0.062,"heat_energy_gcal":0.051,"contracted_power_kw":9.375,"outage_hours":3.176,"service_cost_kuah":2.25}

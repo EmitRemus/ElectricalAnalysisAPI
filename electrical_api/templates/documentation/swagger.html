@@ -1,0 +1,13 @@
+{% extends "documentation/base.html" %}
+{% block title %}Swagger UI{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/swagger-ui/swagger-ui.css') }}">
+<script src="{{ url_for('static', filename='vendor/swagger-ui/swagger-ui-bundle.js') }}" defer></script>
+<script src="{{ url_for('static', filename='swagger.js') }}" defer></script>
+{% endblock %}
+{% block layout %}
+<main id="main-content">
+  <div id="swagger-ui" data-spec-url="{{ url_for('specification') }}"></div>
+  <noscript>Для запуску запитів у Swagger UI увімкніть JavaScript.</noscript>
+</main>
+{% endblock %}

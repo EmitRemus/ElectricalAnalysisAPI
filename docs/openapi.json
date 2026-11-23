@@ -1,0 +1,1579 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Electrical Analysis API",
+    "version": "1.0.0-draft"
+  },
+  "tags": [
+    { "name": "Імпорт наборів" },
+    { "name": "Покази лічильників" },
+    { "name": "Споживачі" },
+    { "name": "Обладнання" },
+    { "name": "Вартість послуг" }
+  ],
+  "paths": {
+    "/v1/datasets": {
+      "post": {
+        "operationId": "importDataset",
+        "tags": ["Імпорт наборів"],
+        "summary": "Імпорт набору вимірювань і пов’язаних даних",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/electrical-dataset-v1.schema.json#/$defs/dataset"
+              },
+              "example": {
+                "schema_version": "1.0",
+                "records": [
+                  {
+                    "record_type": "reading",
+                    "meter_id": "UA100035",
+                    "interval_start": "2026-01-15T08:00:00+02:00",
+                    "interval_minutes": 60,
+                    "received_at": "2026-01-15T09:02:00+02:00",
+                    "energy": 1.42,
+                    "energy_unit": "kWh"
+                  },
+                  {
+                    "record_type": "reading",
+                    "meter_id": "UA100035",
+                    "interval_start": "2026-01-15T08:00:00+02:00",
+                    "interval_minutes": 60,
+                    "received_at": "2026-01-15T09:07:00+02:00",
+                    "energy": 1.45,
+                    "energy_unit": "kWh"
+                  }
+                ]
+              }
+            },
+            "application/x-ndjson": {
+              "schema": {
+                "type": "string"
+              },
+              "description": "UTF-8, перший рядок header, решта record.",
+              "example": "{\"record_type\":\"dataset\",\"schema_version\":\"1.0\"}\n{\"record_type\":\"reading\",\"meter_id\":\"UA100035\",\"interval_start\":\"2026-01-15T08:00:00+02:00\",\"interval_minutes\":60,\"received_at\":\"2026-01-15T09:02:00+02:00\",\"energy\":1.42,\"energy_unit\":\"kWh\"}\n{\"record_type\":\"reading\",\"meter_id\":\"UA100035\",\"interval_start\":\"2026-01-15T08:00:00+02:00\",\"interval_minutes\":60,\"received_at\":\"2026-01-15T09:07:00+02:00\",\"energy\":1.45,\"energy_unit\":\"kWh\"}\n",
+              "x-header-schema": {
+                "$ref": "../schemas/electrical-dataset-v1.schema.json#/$defs/header"
+              },
+              "x-record-schema": {
+                "$ref": "../schemas/electrical-dataset-v1.schema.json#/$defs/record"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Набір прийнято",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dataset_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "counts": {
+                      "type": "object",
+                      "propertyNames": {
+                        "enum": [
+                          "meter",
+                          "reading",
+                          "customer_profile",
+                          "customer_event",
+                          "equipment",
+                          "equipment_observation",
+                          "service_case"
+                        ]
+                      },
+                      "additionalProperties": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    }
+                  },
+                  "required": [
+                    "dataset_id",
+                    "counts"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некоректний синтаксис або структура потоку",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "path": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Непідтримуваний Content-Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "path": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Помилка схеми або значення",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "path": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/readings": {
+      "get": {
+        "operationId": "listReadings",
+        "tags": ["Покази лічильників"],
+        "summary": "Перегляд показів за період",
+        "description": "Фільтрує останні передачі за обраним числовим полем перед поділом на сторінки. Рядки відсортовано за початком інтервалу, а за однакового часу — за ідентифікатором лічильника.",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          { "$ref": "#/components/parameters/ReadingMeterId" },
+          { "$ref": "#/components/parameters/ReadingStart" },
+          { "$ref": "#/components/parameters/ReadingEnd" },
+          { "$ref": "#/components/parameters/ReadingFilterField" },
+          { "$ref": "#/components/parameters/ReadingGreaterThan" },
+          { "$ref": "#/components/parameters/ReadingGreaterOrEqual" },
+          { "$ref": "#/components/parameters/ReadingLessThan" },
+          { "$ref": "#/components/parameters/ReadingLessOrEqual" },
+          { "$ref": "#/components/parameters/ReadingEqual" },
+          { "$ref": "#/components/parameters/ReadingLimit" },
+          { "$ref": "#/components/parameters/ReadingOffset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Сторінка показів у кВт·год",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingsPage" } } }
+          },
+          "404": { "$ref": "#/components/responses/ReadingSelectionNotFound" },
+          "409": { "$ref": "#/components/responses/ReadingSelectionConflict" },
+          "422": {
+            "description": "У наборі немає показів або параметри запиту некоректні",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingSelectionError" } } }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/readings/summary": {
+      "get": {
+        "operationId": "summarizeReadings",
+        "tags": ["Покази лічильників"],
+        "summary": "Середнє та інші підсумки показів",
+        "description": "Обчислює статистику після дедуплікації та фільтрування окремих показів. Середнє є арифметичним середнім на один показ. Без фільтрів статистика охоплює весь набір.",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          { "$ref": "#/components/parameters/ReadingMeterId" },
+          { "$ref": "#/components/parameters/ReadingStart" },
+          { "$ref": "#/components/parameters/ReadingEnd" },
+          { "$ref": "#/components/parameters/ReadingFilterField" },
+          { "$ref": "#/components/parameters/ReadingGreaterThan" },
+          { "$ref": "#/components/parameters/ReadingGreaterOrEqual" },
+          { "$ref": "#/components/parameters/ReadingLessThan" },
+          { "$ref": "#/components/parameters/ReadingLessOrEqual" },
+          { "$ref": "#/components/parameters/ReadingEqual" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Кількість лічильників і показів, сума, середнє, медіана, мінімум і максимум у кВт·год",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingsSummary" } } }
+          },
+          "404": { "$ref": "#/components/responses/ReadingSelectionNotFound" },
+          "409": { "$ref": "#/components/responses/ReadingSelectionConflict" },
+          "422": { "$ref": "#/components/responses/ReadingStatisticsInvalid" }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/readings/daily": {
+      "get": {
+        "operationId": "summarizeReadingsByDay",
+        "tags": ["Покази лічильників"],
+        "summary": "Підсумки показів за днями",
+        "description": "Застосовує числові фільтри до окремих показів, потім групує їх за датою початку інтервалу в UTC. Повертає лише дні з відібраними показами у хронологічному порядку.",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          { "$ref": "#/components/parameters/ReadingMeterId" },
+          { "$ref": "#/components/parameters/ReadingStart" },
+          { "$ref": "#/components/parameters/ReadingEnd" },
+          { "$ref": "#/components/parameters/ReadingFilterField" },
+          { "$ref": "#/components/parameters/ReadingGreaterThan" },
+          { "$ref": "#/components/parameters/ReadingGreaterOrEqual" },
+          { "$ref": "#/components/parameters/ReadingLessThan" },
+          { "$ref": "#/components/parameters/ReadingLessOrEqual" },
+          { "$ref": "#/components/parameters/ReadingEqual" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Кількість показів і статистика енергії для кожного дня",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingsDaily" } } }
+          },
+          "404": { "$ref": "#/components/responses/ReadingSelectionNotFound" },
+          "409": { "$ref": "#/components/responses/ReadingSelectionConflict" },
+          "422": { "$ref": "#/components/responses/ReadingStatisticsInvalid" }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/readings/deduplicated": {
+      "get": {
+        "operationId": "downloadDeduplicatedReadings",
+        "tags": ["Покази лічильників"],
+        "summary": "Завантаження вимірювань після дедуплікації",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Файл Parquet з одним вимірюванням на пару meter_id та interval_start",
+            "content": {
+              "application/vnd.apache.parquet": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReadingDownloadError" }
+              }
+            }
+          },
+          "409": {
+            "description": "Останні передачі для цього вимірювання мають різні значення",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReadingConflict" }
+              }
+            }
+          },
+          "422": {
+            "description": "У наборі немає вимірювань",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReadingDownloadError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/readings/quality": {
+      "get": {
+        "operationId": "reportReadingQuality",
+        "tags": ["Покази лічильників"],
+        "summary": "Звіт про якість вимірювань",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          { "$ref": "#/components/parameters/WindowEnd" },
+          { "$ref": "#/components/parameters/SilenceHours" },
+          { "$ref": "#/components/parameters/FrozenRatio" },
+          { "$ref": "#/components/parameters/UnitRatio" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Звіт за дедуплікованими вимірюваннями",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingQuality" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "409": {
+            "description": "Останні передачі для одного вимірювання мають різні значення",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingConflict" } } }
+          },
+          "422": {
+            "description": "У наборі немає вимірювань або задано некоректний параметр",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/ReadingDownloadError" },
+                    { "$ref": "#/components/schemas/ReadingParameterError" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/readings/household-regression": {
+      "get": {
+        "operationId": "fitHouseholdRegression",
+        "tags": ["Покази лічильників"],
+        "summary": "Лінійна регресія добового споживання домогосподарств",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          { "$ref": "#/components/parameters/WindowEnd" },
+          { "$ref": "#/components/parameters/SilenceHours" },
+          { "$ref": "#/components/parameters/FrozenRatio" },
+          { "$ref": "#/components/parameters/UnitRatio" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Коефіцієнти в kWh на добу та статистика навчання",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HouseholdRegression" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "409": {
+            "description": "Останні передачі для одного вимірювання мають різні значення",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingConflict" } } }
+          },
+          "422": {
+            "description": "Дані або параметри не дають змоги навчити модель",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/ReadingDownloadError" },
+                    { "$ref": "#/components/schemas/ReadingParameterError" },
+                    { "$ref": "#/components/schemas/HouseholdRegressionError" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/customers/segmentation": {
+      "get": {
+        "operationId": "segmentCustomers",
+        "tags": ["Споживачі"],
+        "summary": "Сегментація споживачів за методами k-середніх і Варда",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          { "$ref": "#/components/parameters/ClusterCount" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Профілі сегментів, мітки споживачів і метрики кластеризації",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CustomerSegmentation" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "422": {
+            "description": "Дані або параметри не дають змоги виконати сегментацію",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/ReadingParameterError" },
+                    { "$ref": "#/components/schemas/CustomerSegmentationError" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/customers/som": {
+      "get": {
+        "operationId": "trainCustomerMaps",
+        "tags": ["Споживачі"],
+        "summary": "Карти Кохонена для профілів споживачів",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          { "$ref": "#/components/parameters/ClusterCount" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Дві карти Кохонена, топографічні помилки й координати споживачів",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CustomerSOM" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "422": {
+            "description": "Дані або параметри не дають змоги побудувати карти",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/ReadingParameterError" },
+                    { "$ref": "#/components/schemas/CustomerSegmentationError" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": { "const": "som_numeric_range" },
+                        "message": { "type": "string" }
+                      },
+                      "required": ["code", "message"]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/customers/churn-rules": {
+      "get": {
+        "operationId": "findCustomerChurnRules",
+        "tags": ["Споживачі"],
+        "summary": "Асоціативні правила переходу до іншого постачальника",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          {
+            "name": "min_support", "in": "query",
+            "description": "За відсутності параметра звіти формуються для 0.05 і 0.10.",
+            "schema": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+          },
+          {
+            "name": "min_confidence", "in": "query",
+            "schema": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.30 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Асоціативні правила з наслідком churned і базова частка переходів",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CustomerChurnRules" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "422": {
+            "description": "Відсутні вхідні дані або надано некоректні параметри",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/ReadingParameterError" },
+                    { "$ref": "#/components/schemas/CustomerChurnRulesError" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/customers/pitfalls": {
+      "get": {
+        "operationId": "reportCustomerPitfalls",
+        "tags": ["Споживачі"],
+        "summary": "Перевірки T‑1, T‑2 і T‑3 для профілів споживачів",
+        "parameters": [{ "$ref": "#/components/parameters/DatasetId" }],
+        "responses": {
+          "200": {
+            "description": "Прапорці перевірок, кореляції, середні та пороги",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CustomerPitfalls" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "422": {
+            "description": "У наборі немає таблиці профілів або є повторні customer_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "enum": ["customer_profiles_missing", "duplicate_customer_id"] },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/equipment/audit": {
+      "get": {
+        "operationId": "reportEquipmentAudit",
+        "tags": ["Обладнання"],
+        "summary": "Аудит даних обладнання за перевірками M‑1, M‑2 і M‑3",
+        "parameters": [{ "$ref": "#/components/parameters/DatasetId" }],
+        "responses": {
+          "200": {
+            "description": "Оцінки ROC AUC, покриття реєстру й зсув середнього електричного навантаження",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EquipmentAudit" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "422": {
+            "description": "Потрібні обидві таблиці обладнання й однозначні ключі реєстру",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EquipmentDataError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/equipment/model-evaluation": {
+      "get": {
+        "operationId": "evaluateEquipmentFailureModel",
+        "tags": ["Обладнання"],
+        "summary": "Навчання й оцінювання однієї моделі відмов обладнання",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          {
+            "name": "model", "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["perceptron", "decision_tree", "svm", "knn", "naive_bayes"],
+              "default": "perceptron"
+            }
+          },
+          {
+            "name": "alpha", "in": "query",
+            "description": "Регуляризація для перцептрона. Якщо параметр пропущено, перцептрон використовує 1.0.",
+            "schema": { "type": "number", "minimum": 0 },
+            "example": 0.01
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Метрики однієї вибраної моделі на навчальній і валідаційній частинах",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EquipmentModelEvaluation" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "422": {
+            "description": "Дані або параметри не дають змоги оцінити модель",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/ReadingParameterError" },
+                    { "$ref": "#/components/schemas/EquipmentDataError" },
+                    { "$ref": "#/components/schemas/EquipmentModelError" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/readings/inspection-priority": {
+      "get": {
+        "operationId": "assessMeterInspectionPriority",
+        "tags": ["Покази лічильників"],
+        "summary": "Пріоритет перевірки лічильника за методом Мамдані",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          {
+            "name": "meter_id", "in": "query", "required": true,
+            "description": "Ідентифікатор лічильника з імпортованих показів.",
+            "schema": { "type": "string", "minLength": 1 }, "example": "UA100035"
+          },
+          { "$ref": "#/components/parameters/WindowEnd" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Показники лічильника, бал пріоритету та сили двох правил",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MeterInspectionPriority" } } }
+          },
+          "404": {
+            "description": "Набір або покази цього лічильника не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MeterInspectionNotFound" } } }
+          },
+          "409": {
+            "description": "Останні передачі цього лічильника суперечать одна одній",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingConflict" } } }
+          },
+          "422": {
+            "description": "У наборі немає показів або задано некоректний параметр",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "$ref": "#/components/schemas/ReadingDownloadError" },
+              { "$ref": "#/components/schemas/ReadingParameterError" }
+            ] } } }
+          }
+        }
+      }
+    },
+    "/v1/readings/inspection-priority/surface": {
+      "get": {
+        "operationId": "getMeterInspectionPrioritySurface",
+        "tags": ["Покази лічильників"],
+        "summary": "Поверхня пріоритету перевірки лічильника",
+        "responses": {
+          "200": {
+            "description": "Осі затримки та частки повторюваних значень і матриця балів 21×21",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MeterInspectionPrioritySurface" } } }
+          }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/service-cases/subtractive-clustering": {
+      "get": {
+        "operationId": "countSubtractiveServiceCostRules",
+        "tags": ["Вартість послуг"],
+        "summary": "Кількість правил субтрактивної кластеризації з КП",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          {
+            "name": "radius", "in": "query",
+            "schema": { "type": "number", "exclusiveMinimum": 0, "default": 0.5 },
+            "example": 0.3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Кількість правил для вибраного радіуса та розміри частин",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubtractiveCostRules" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "422": { "$ref": "#/components/responses/ServiceCostValidationError" }
+        }
+      }
+    },
+    "/v1/datasets/{dataset_id}/service-cases/cost-model": {
+      "get": {
+        "operationId": "evaluateSugenoServiceCostModel",
+        "tags": ["Вартість послуг"],
+        "summary": "Модель Сугено для вартості сервісу з КП",
+        "parameters": [
+          { "$ref": "#/components/parameters/DatasetId" },
+          {
+            "name": "rules", "in": "query",
+            "schema": { "type": "integer", "minimum": 2, "maximum": 6, "default": 3 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "RMSE базового прогнозу й моделі до та після налаштування і прогнози для незаданих вартостей",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SugenoCostModel" } } }
+          },
+          "404": {
+            "description": "Набір не знайдено",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+          },
+          "422": { "$ref": "#/components/responses/ServiceCostValidationError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "DatasetId": {
+        "name": "dataset_id", "in": "path", "required": true,
+        "schema": { "type": "string", "format": "uuid" }
+      },
+      "ReadingMeterId": {
+        "name": "meter_id", "in": "query",
+        "description": "Ідентифікатор одного лічильника. Без параметра враховуються всі лічильники.",
+        "schema": { "type": "string", "minLength": 1 }
+      },
+      "ReadingStart": {
+        "name": "start", "in": "query",
+        "description": "Нижня включна межа за початком інтервалу. Приймає дату YYYY-MM-DD у UTC або час ISO 8601 зі зміщенням чи Z.",
+        "schema": { "type": "string" }
+      },
+      "ReadingEnd": {
+        "name": "end", "in": "query",
+        "description": "Верхня невключна межа за початком інтервалу. Приймає дату YYYY-MM-DD у UTC або час ISO 8601 зі зміщенням чи Z.",
+        "schema": { "type": "string" }
+      },
+      "ReadingFilterField": {
+        "name": "filter_field", "in": "query",
+        "description": "Поле для всіх заданих порівнянь. energy_kwh порівнює енергію у кВт·год, interval_minutes приймає цілі межі у хвилинах. Усі задані умови мають виконуватися одночасно.",
+        "schema": { "type": "string", "enum": ["energy_kwh", "interval_minutes"], "default": "energy_kwh" }
+      },
+      "ReadingGreaterThan": {
+        "name": "gt", "in": "query",
+        "description": "Значення має бути строго більше за межу.",
+        "schema": { "type": "number" }
+      },
+      "ReadingGreaterOrEqual": {
+        "name": "gte", "in": "query",
+        "description": "Значення має бути більше за межу або дорівнювати їй.",
+        "schema": { "type": "number" }
+      },
+      "ReadingLessThan": {
+        "name": "lt", "in": "query",
+        "description": "Значення має бути строго менше за межу.",
+        "schema": { "type": "number" }
+      },
+      "ReadingLessOrEqual": {
+        "name": "lte", "in": "query",
+        "description": "Значення має бути менше за межу або дорівнювати їй.",
+        "schema": { "type": "number" }
+      },
+      "ReadingEqual": {
+        "name": "eq", "in": "query",
+        "description": "Значення має точно дорівнювати заданому числу.",
+        "schema": { "type": "number" }
+      },
+      "ReadingLimit": {
+        "name": "limit", "in": "query",
+        "description": "Максимальна кількість показів на сторінці.",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 100 }
+      },
+      "ReadingOffset": {
+        "name": "offset", "in": "query",
+        "description": "Кількість пропущених показів. Для наступної сторінки передайте next_offset.",
+        "schema": { "type": "integer", "minimum": 0, "maximum": 9223372036854775807, "default": 0 }
+      },
+      "ClusterCount": {
+        "name": "k", "in": "query",
+        "schema": { "type": "integer", "minimum": 2, "maximum": 8, "default": 4 }
+      },
+      "WindowEnd": {
+        "name": "window_end", "in": "query",
+        "description": "Кінець спостереження. За замовчуванням найпізніший interval_start набору.",
+        "schema": { "type": "string", "format": "date-time" }
+      },
+      "SilenceHours": {
+        "name": "silence_hours", "in": "query",
+        "schema": { "type": "number", "minimum": 0, "default": 48 }
+      },
+      "FrozenRatio": {
+        "name": "frozen_ratio", "in": "query",
+        "schema": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.65 }
+      },
+      "UnitRatio": {
+        "name": "unit_ratio", "in": "query",
+        "schema": { "type": "number", "minimum": 0, "default": 100 }
+      }
+    },
+    "responses": {
+      "ReadingSelectionNotFound": {
+        "description": "Набір не знайдено",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingDownloadError" } } }
+      },
+      "ReadingSelectionConflict": {
+        "description": "Останні передачі у вибірці для одного інтервалу мають різні значення",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReadingConflict" } } }
+      },
+      "ReadingStatisticsInvalid": {
+        "description": "У наборі немає показів, параметри некоректні або сума виходить за числовий діапазон",
+        "content": {
+          "application/json": {
+            "schema": {
+              "oneOf": [
+                { "$ref": "#/components/schemas/ReadingSelectionError" },
+                { "$ref": "#/components/schemas/ReadingNumericError" }
+              ]
+            }
+          }
+        }
+      },
+      "ServiceCostValidationError": {
+        "description": "Параметри або сервісні записи не дають змоги виконати обчислення",
+        "content": {
+          "application/json": {
+            "schema": {
+              "oneOf": [
+                { "$ref": "#/components/schemas/ReadingParameterError" },
+                { "$ref": "#/components/schemas/ServiceCostDataError" }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ReadingsPage": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "total": { "type": "integer", "minimum": 0, "description": "Загальна кількість показів після фільтрації та дедуплікації." },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Максимальна кількість показів на сторінці." },
+          "offset": { "type": "integer", "minimum": 0, "description": "Кількість пропущених показів." },
+          "next_offset": { "type": ["integer", "null"], "minimum": 0, "description": "Зміщення наступної сторінки або null, якщо покази закінчилися." },
+          "readings": { "type": "array", "items": { "$ref": "#/components/schemas/NormalizedReading" }, "description": "Покази на поточній сторінці." }
+        },
+        "required": ["dataset_id", "total", "limit", "offset", "next_offset", "readings"]
+      },
+      "NormalizedReading": {
+        "type": "object",
+        "properties": {
+          "meter_id": { "type": "string" },
+          "interval_start": { "type": "string", "format": "date-time", "description": "Початок інтервалу в UTC." },
+          "interval_minutes": { "type": "integer", "minimum": 1 },
+          "received_at": { "type": "string", "format": "date-time", "description": "Час отримання останньої передачі в UTC." },
+          "energy_kwh": { "type": "number", "description": "Енергія за інтервал у кВт·год." }
+        },
+        "required": ["meter_id", "interval_start", "interval_minutes", "received_at", "energy_kwh"]
+      },
+      "ReadingsSummary": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "meter_count": { "type": "integer", "minimum": 0, "description": "Кількість лічильників із показами у вибірці." },
+          "reading_count": { "type": "integer", "minimum": 0 },
+          "total_kwh": { "type": "number", "description": "Сума енергії у кВт·год, для порожньої вибірки дорівнює 0." },
+          "average_kwh": { "type": ["number", "null"], "description": "Середнє арифметичне у кВт·год на один показ, для порожньої вибірки дорівнює null." },
+          "median_kwh": { "type": ["number", "null"], "description": "Медіана показів у кВт·год, для порожньої вибірки дорівнює null." },
+          "min_kwh": { "type": ["number", "null"], "description": "Найменший показ у кВт·год, для порожньої вибірки дорівнює null." },
+          "max_kwh": { "type": ["number", "null"], "description": "Найбільший показ у кВт·год, для порожньої вибірки дорівнює null." }
+        },
+        "required": ["dataset_id", "meter_count", "reading_count", "total_kwh", "average_kwh", "median_kwh", "min_kwh", "max_kwh"]
+      },
+      "ReadingsDaily": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "days": { "type": "array", "items": { "$ref": "#/components/schemas/ReadingDay" }, "description": "Дата в UTC, кількість показів, сума, середнє, медіана, мінімум і максимум за кожен день." }
+        },
+        "required": ["dataset_id", "days"]
+      },
+      "ReadingDay": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "format": "date" },
+          "reading_count": { "type": "integer", "minimum": 1 },
+          "total_kwh": { "type": "number" },
+          "average_kwh": { "type": "number" },
+          "median_kwh": { "type": "number" },
+          "min_kwh": { "type": "number" },
+          "max_kwh": { "type": "number" }
+        },
+        "required": ["date", "reading_count", "total_kwh", "average_kwh", "median_kwh", "min_kwh", "max_kwh"]
+      },
+      "ReadingSelectionError": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/ReadingDownloadError" },
+          { "$ref": "#/components/schemas/ReadingParameterError" }
+        ]
+      },
+      "ReadingNumericError": {
+        "type": "object",
+        "properties": {
+          "code": { "const": "readings_numeric_range" },
+          "message": { "type": "string" }
+        },
+        "required": ["code", "message"]
+      },
+      "ReadingDownloadError": {
+        "type": "object",
+        "properties": {
+          "code": { "enum": ["dataset_not_found", "readings_missing"] },
+          "message": { "type": "string" }
+        },
+        "required": ["code", "message"]
+      },
+      "ReadingConflict": {
+        "type": "object",
+        "properties": {
+          "code": { "const": "reading_conflict" },
+          "message": { "type": "string" },
+          "meter_id": { "type": "string" },
+          "interval_start": { "type": "string", "format": "date-time" },
+          "received_at": { "type": "string", "format": "date-time" }
+        },
+        "required": ["code", "message", "meter_id", "interval_start", "received_at"]
+      },
+      "ReadingParameterError": {
+        "type": "object",
+        "properties": {
+          "code": { "const": "validation_error" },
+          "message": { "type": "string" },
+          "path": { "type": "string" }
+        },
+        "required": ["code", "message", "path"]
+      },
+      "ReadingQualityThresholds": {
+        "type": "object",
+        "properties": {
+          "silence_hours": { "type": "number", "minimum": 0 },
+          "frozen_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "unit_ratio": { "type": "number", "minimum": 0 }
+        },
+        "required": ["silence_hours", "frozen_ratio", "unit_ratio"]
+      },
+      "HouseholdRegression": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "window_end": { "type": "string", "format": "date-time" },
+          "thresholds": { "$ref": "#/components/schemas/ReadingQualityThresholds" },
+          "meter_count": { "type": "integer", "minimum": 3 },
+          "rescaled_meter_ids": { "type": "array", "items": { "type": "string" } },
+          "intercept": { "type": "number" },
+          "coefficients": {
+            "type": "object",
+            "properties": {
+              "electric_heating": { "type": "number" },
+              "dual_zone": { "type": "number" }
+            },
+            "required": ["electric_heating", "dual_zone"]
+          },
+          "r_squared": { "type": "number" }
+        },
+        "required": ["dataset_id", "window_end", "thresholds", "meter_count", "rescaled_meter_ids",
+                     "intercept", "coefficients", "r_squared"]
+      },
+      "HouseholdRegressionError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "enum": ["meters_missing", "hourly_readings_missing", "meter_registry_conflict",
+                     "insufficient_regression_data", "regression_numeric_range"]
+          },
+          "message": { "type": "string" }
+        },
+        "required": ["code", "message"]
+      },
+      "CustomerSegmentation": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "k": { "type": "integer", "minimum": 2, "maximum": 8 },
+          "customer_count": { "type": "integer", "minimum": 3 },
+          "pca": {
+            "type": "object",
+            "properties": {
+              "eigenvalues": { "type": "array", "items": { "type": "number" } },
+              "explained_variance_ratio": { "type": "array", "items": { "type": "number" } },
+              "cumulative_explained_variance_ratio": { "type": "array", "items": { "type": "number" } },
+              "kaiser_components": { "type": "integer", "minimum": 0 },
+              "kaiser_explained_variance_ratio": { "type": "number" },
+              "loadings": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": { "PC1": { "type": "number" }, "PC2": { "type": "number" } },
+                  "required": ["PC1", "PC2"]
+                }
+              }
+            },
+            "required": ["eigenvalues", "explained_variance_ratio", "cumulative_explained_variance_ratio",
+                         "kaiser_components", "kaiser_explained_variance_ratio", "loadings"]
+          },
+          "kmeans_candidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "k": { "type": "integer" },
+                "inertia": { "type": "number" },
+                "silhouette": { "type": "number" }
+              },
+              "required": ["k", "inertia", "silhouette"]
+            }
+          },
+          "ward_cut_gaps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": { "k": { "type": "integer" }, "height_gap": { "type": "number" } },
+              "required": ["k", "height_gap"]
+            }
+          },
+          "adjusted_rand_index": { "type": "number" },
+          "contingency": {
+            "type": "object",
+            "properties": {
+              "segment_ids": { "type": "array", "items": { "type": "integer" } },
+              "ward_ids": { "type": "array", "items": { "type": "integer" } },
+              "counts": { "type": "array", "items": { "type": "array", "items": { "type": "integer" } } }
+            },
+            "required": ["segment_ids", "ward_ids", "counts"]
+          },
+          "profiles": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                { "$ref": "#/components/schemas/CustomerSegmentProfile" },
+                { "type": "object", "required": ["segment_id"] }
+              ]
+            }
+          },
+          "baseline": { "$ref": "#/components/schemas/CustomerSegmentProfile" },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "customer_id": { "type": "string" },
+                "segment_id": { "type": "integer", "minimum": 0 },
+                "ward_id": { "type": "integer", "minimum": 1 }
+              },
+              "required": ["customer_id", "segment_id", "ward_id"]
+            }
+          }
+        },
+        "required": ["dataset_id", "k", "customer_count", "pca", "kmeans_candidates", "ward_cut_gaps",
+                     "adjusted_rand_index", "contingency", "profiles", "baseline", "assignments"]
+      },
+      "CustomerSegmentProfile": {
+        "type": "object",
+        "properties": {
+          "segment_id": { "type": "integer", "minimum": 0 },
+          "count": { "type": "integer", "minimum": 1 },
+          "avg_daily_kwh": { "type": "number" },
+          "night_share": { "type": "number" },
+          "seasonality": { "type": "number" },
+          "weekend_ratio": { "type": "number" },
+          "stability": { "type": "number" },
+          "churned": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+          "ind_1985": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "required": ["count", "avg_daily_kwh", "night_share", "seasonality", "weekend_ratio",
+                     "stability", "churned", "ind_1985"]
+      },
+      "CustomerSOM": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "k": { "type": "integer", "minimum": 2, "maximum": 8 },
+          "customer_count": { "type": "integer", "minimum": 3 },
+          "grid_size": { "type": "integer", "const": 15 },
+          "iterations": { "type": "integer", "const": 20000 },
+          "learning_rate": { "type": "number", "const": 0.5 },
+          "random_seed": { "type": "integer", "const": 0 },
+          "maps": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "$ref": "#/components/schemas/CustomerSOMMap" }
+          }
+        },
+        "required": ["dataset_id", "k", "customer_count", "grid_size", "iterations", "learning_rate", "random_seed", "maps"]
+      },
+      "CustomerSOMMap": {
+        "type": "object",
+        "properties": {
+          "sigma": { "type": "number", "enum": [1.5, 0.5] },
+          "topographic_error": { "type": "number", "minimum": 0, "maximum": 1 },
+          "distance_map": {
+            "type": "array",
+            "minItems": 15,
+            "maxItems": 15,
+            "items": {
+              "type": "array",
+              "minItems": 15,
+              "maxItems": 15,
+              "items": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "customer_id": { "type": "string" },
+                "segment_id": { "type": "integer", "minimum": 0 },
+                "x": { "type": "integer", "minimum": 0, "maximum": 14 },
+                "y": { "type": "integer", "minimum": 0, "maximum": 14 }
+              },
+              "required": ["customer_id", "segment_id", "x", "y"]
+            }
+          }
+        },
+        "required": ["sigma", "topographic_error", "distance_map", "assignments"]
+      },
+      "CustomerChurnRules": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "customer_count": { "type": "integer", "minimum": 1 },
+          "labeled_customer_count": { "type": "integer", "minimum": 1 },
+          "churned_count": { "type": "integer", "minimum": 0 },
+          "churn_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+          "min_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "reports": {
+            "type": "array", "minItems": 1, "maxItems": 2,
+            "items": {
+              "type": "object",
+              "properties": {
+                "min_support": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+                "rule_count": { "type": "integer", "minimum": 0 },
+                "rules": { "type": "array", "items": { "$ref": "#/components/schemas/CustomerChurnRule" } }
+              },
+              "required": ["min_support", "rule_count", "rules"]
+            }
+          }
+        },
+        "required": ["dataset_id", "customer_count", "labeled_customer_count", "churned_count", "churn_rate",
+                     "min_confidence", "reports"]
+      },
+      "CustomerChurnRule": {
+        "type": "object",
+        "properties": {
+          "antecedents": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+          "consequent": { "const": "churned" },
+          "support": { "type": "number", "minimum": 0, "maximum": 1 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "lift": { "type": "number", "minimum": 0 }
+        },
+        "required": ["antecedents", "consequent", "support", "confidence", "lift"]
+      },
+      "CustomerChurnRulesError": {
+        "type": "object",
+        "properties": {
+          "code": { "enum": ["customer_profiles_missing", "customer_events_missing", "duplicate_customer_id", "churn_labels_missing"] },
+          "message": { "type": "string" }
+        },
+        "required": ["code", "message"]
+      },
+      "CustomerPitfalls": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "customer_count": { "type": "integer", "minimum": 1 },
+          "t1": {
+            "type": "object",
+            "properties": {
+              "detected": { "type": ["boolean", "null"] },
+              "total_correlation": { "$ref": "#/components/schemas/NullableCorrelation" },
+              "district_correlations": {
+                "type": "object",
+                "additionalProperties": { "$ref": "#/components/schemas/NullableCorrelation" }
+              },
+              "total_threshold": { "const": 0.20 },
+              "district_threshold": { "const": 0.10 }
+            },
+            "required": ["detected", "total_correlation", "district_correlations", "total_threshold", "district_threshold"]
+          },
+          "t2": {
+            "type": "object",
+            "properties": {
+              "detected": { "type": ["boolean", "null"] },
+              "mean_ind_1985": { "type": ["number", "null"] },
+              "mean_other": { "type": ["number", "null"] },
+              "ratio": { "type": ["number", "null"] },
+              "lower_threshold": { "const": 0.8 },
+              "upper_threshold": { "const": 1.2 }
+            },
+            "required": ["detected", "mean_ind_1985", "mean_other", "ratio", "lower_threshold", "upper_threshold"]
+          },
+          "t3": {
+            "type": "object",
+            "properties": {
+              "detected": { "type": ["boolean", "null"] },
+              "top_fraction": { "const": 0.30 },
+              "top": { "$ref": "#/components/schemas/PriceChurnGroup" },
+              "other": { "$ref": "#/components/schemas/PriceChurnGroup" }
+            },
+            "required": ["detected", "top_fraction", "top", "other"]
+          }
+        },
+        "required": ["dataset_id", "customer_count", "t1", "t2", "t3"]
+      },
+      "NullableCorrelation": {
+        "type": ["number", "null"], "minimum": -1, "maximum": 1
+      },
+      "PriceChurnGroup": {
+        "type": "object",
+        "properties": {
+          "customer_count": { "type": "integer", "minimum": 0 },
+          "labeled_count": { "type": "integer", "minimum": 0 },
+          "correlation": { "$ref": "#/components/schemas/NullableCorrelation" }
+        },
+        "required": ["customer_count", "labeled_count", "correlation"]
+      },
+      "ServiceCostDataError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "enum": ["service_cases_missing", "duplicate_case_id", "insufficient_cost_data", "constant_service_cost",
+                     "cost_model_numeric_range"]
+          },
+          "message": { "type": "string" }
+        },
+        "required": ["code", "message"]
+      },
+      "SubtractiveCostRules": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "radius": { "type": "number", "exclusiveMinimum": 0 },
+          "rule_count": { "type": "integer", "minimum": 1 },
+          "training_count": { "type": "integer", "minimum": 2 },
+          "test_count": { "type": "integer", "minimum": 1 }
+        },
+        "required": ["dataset_id", "radius", "rule_count", "training_count", "test_count"]
+      },
+      "ServiceCostRmse": {
+        "type": "object",
+        "properties": {
+          "train_rmse_kuah": { "type": "number", "minimum": 0 },
+          "test_rmse_kuah": { "type": "number", "minimum": 0 },
+          "rmse_gap_kuah": { "type": "number" }
+        },
+        "required": ["train_rmse_kuah", "test_rmse_kuah", "rmse_gap_kuah"]
+      },
+      "SugenoCostModel": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "rule_count": { "type": "integer", "minimum": 2, "maximum": 6 },
+          "training_count": { "type": "integer", "minimum": 2 },
+          "test_count": { "type": "integer", "minimum": 1 },
+          "baseline": {
+            "allOf": [
+              { "$ref": "#/components/schemas/ServiceCostRmse" },
+              {
+                "type": "object",
+                "properties": { "mean_prediction_kuah": { "type": "number" } },
+                "required": ["mean_prediction_kuah"]
+              }
+            ]
+          },
+          "initial": { "$ref": "#/components/schemas/ServiceCostRmse" },
+          "tuned": { "$ref": "#/components/schemas/ServiceCostRmse" },
+          "optimization": {
+            "type": "object",
+            "properties": {
+              "converged": { "type": "boolean" },
+              "iterations": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["converged", "iterations"]
+          },
+          "predictions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "case_id": { "type": "string" },
+                "predicted_service_cost_kuah": { "type": "number" }
+              },
+              "required": ["case_id", "predicted_service_cost_kuah"]
+            }
+          }
+        },
+        "required": ["dataset_id", "rule_count", "training_count", "test_count", "baseline", "initial", "tuned",
+                     "optimization", "predictions"]
+      },
+      "MeterInspectionPriority": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "meter_id": { "type": "string", "minLength": 1 },
+          "window_end": { "type": "string", "format": "date-time" },
+          "last_interval_start": { "type": "string", "format": "date-time" },
+          "hours_since_last_reading": { "type": "number", "minimum": 0 },
+          "reading_count": { "type": "integer", "minimum": 1 },
+          "unique_values": { "type": "integer", "minimum": 1 },
+          "unique_ratio": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+          "repetition_ratio": { "type": "number", "minimum": 0, "exclusiveMaximum": 1 },
+          "priority_score": { "type": "number", "minimum": 0, "maximum": 100,
+                              "description": "Евристичний бал Мамдані. Вищий бал відповідає вищому пріоритету." },
+          "rule_strengths": {
+            "type": "object",
+            "properties": {
+              "routine": { "type": "number", "minimum": 0, "maximum": 1 },
+              "escalate": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": ["routine", "escalate"]
+          }
+        },
+        "required": ["dataset_id", "meter_id", "window_end", "last_interval_start", "hours_since_last_reading",
+                     "reading_count", "unique_values", "unique_ratio", "repetition_ratio", "priority_score", "rule_strengths"]
+      },
+      "MeterInspectionNotFound": {
+        "type": "object",
+        "properties": {
+          "code": { "enum": ["dataset_not_found", "meter_readings_missing"] },
+          "message": { "type": "string" }
+        },
+        "required": ["code", "message"]
+      },
+      "MeterInspectionPrioritySurface": {
+        "type": "object",
+        "properties": {
+          "hours_since_last_reading": {
+            "type": "array", "minItems": 21, "maxItems": 21,
+            "items": { "type": "number", "minimum": 0, "maximum": 96 }
+          },
+          "repetition_ratio": {
+            "type": "array", "minItems": 21, "maxItems": 21,
+            "items": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "priority_scores": {
+            "type": "array", "minItems": 21, "maxItems": 21,
+            "items": { "type": "array", "minItems": 21, "maxItems": 21,
+                       "items": { "type": "number", "minimum": 0, "maximum": 100 } }
+          }
+        },
+        "required": ["hours_since_last_reading", "repetition_ratio", "priority_scores"]
+      },
+      "EquipmentDataError": {
+        "type": "object",
+        "properties": {
+          "code": { "enum": ["equipment_missing", "equipment_observations_missing", "duplicate_equipment_id", "unknown_equipment_id"] },
+          "message": { "type": "string" }
+        },
+        "required": ["code", "message"]
+      },
+      "EquipmentModelError": {
+        "type": "object",
+        "properties": {
+          "code": { "enum": ["duplicate_training_equipment", "insufficient_failure_data", "no_model_features", "model_numeric_range"] },
+          "message": { "type": "string" }
+        },
+        "required": ["code", "message"]
+      },
+      "EquipmentModelEvaluation": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "model": { "type": "string", "enum": ["perceptron", "decision_tree", "svm", "knn", "naive_bayes"] },
+          "alpha": { "type": "number", "minimum": 0, "description": "Застосоване alpha перцептрона." },
+          "validation_fraction": { "const": 0.25 },
+          "feature_columns": { "type": "array", "items": { "type": "string" } },
+          "excluded_features": { "type": "array", "items": { "type": "string" } },
+          "training": { "$ref": "#/components/schemas/EquipmentModelMetrics" },
+          "validation": { "$ref": "#/components/schemas/EquipmentModelMetrics" },
+          "pr_auc_gap": { "type": "number", "minimum": -1, "maximum": 1, "description": "Навчальний PR-AUC мінус валідаційний PR-AUC." }
+        },
+        "required": ["dataset_id", "model", "validation_fraction", "feature_columns", "excluded_features",
+                     "training", "validation", "pr_auc_gap"],
+        "if": { "properties": { "model": { "const": "perceptron" } } },
+        "then": { "required": ["alpha"] },
+        "else": { "not": { "required": ["alpha"] } }
+      },
+      "EquipmentModelMetrics": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer", "minimum": 2 },
+          "failure_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+          "pr_auc": { "type": "number", "minimum": 0, "maximum": 1 },
+          "roc_auc": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "required": ["count", "failure_rate", "pr_auc", "roc_auc"]
+      },
+      "EquipmentAudit": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "equipment_count": { "type": "integer", "minimum": 1 },
+          "training_count": { "type": "integer", "minimum": 0 },
+          "prediction_count": { "type": "integer", "minimum": 0 },
+          "failed_count": { "type": "integer", "minimum": 0 },
+          "failure_rate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+          "m1": {
+            "type": "object",
+            "properties": {
+              "detected": { "type": ["boolean", "null"] },
+              "threshold": { "const": 0.9 },
+              "scores": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "column": { "type": "string" },
+                    "roc_auc": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+                    "roc_auc_adjusted": { "type": ["number", "null"], "minimum": 0.5, "maximum": 1 }
+                  },
+                  "required": ["column", "roc_auc", "roc_auc_adjusted"]
+                }
+              },
+              "flagged_columns": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["detected", "threshold", "scores", "flagged_columns"]
+          },
+          "m2": {
+            "type": "object",
+            "properties": {
+              "detected": { "type": ["boolean", "null"] },
+              "threshold": { "const": 0.9 },
+              "coverage": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+              "history_count": { "type": "integer", "minimum": 0 },
+              "covered_history_count": { "type": "integer", "minimum": 0 },
+              "training_outside_history_count": { "type": "integer", "minimum": 0 },
+              "mean_install_year_covered": { "type": ["number", "null"] },
+              "mean_install_year_uncovered": { "type": ["number", "null"] }
+            },
+            "required": ["detected", "threshold", "coverage", "history_count", "covered_history_count",
+                         "training_outside_history_count", "mean_install_year_covered", "mean_install_year_uncovered"]
+          },
+          "m3": {
+            "type": "object",
+            "description": "Різниця середніх load_mean у prediction і training в одиницях стандартного відхилення training.",
+            "properties": {
+              "feature": { "const": "load_mean" },
+              "detected": { "type": ["boolean", "null"] },
+              "threshold": { "const": 0.5 },
+              "train_mean": { "type": ["number", "null"] },
+              "prediction_mean": { "type": ["number", "null"] },
+              "train_std": { "type": ["number", "null"], "minimum": 0 },
+              "drift": { "type": ["number", "null"] }
+            },
+            "required": ["feature", "detected", "threshold", "train_mean", "prediction_mean", "train_std", "drift"]
+          }
+        },
+        "required": ["dataset_id", "equipment_count", "training_count", "prediction_count", "failed_count",
+                     "failure_rate", "m1", "m2", "m3"]
+      },
+      "CustomerSegmentationError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "enum": ["customer_profiles_missing", "duplicate_customer_id", "nonpositive_avg_daily_kwh",
+                     "insufficient_segmentation_data", "segmentation_numeric_range"]
+          },
+          "message": { "type": "string" }
+        },
+        "required": ["code", "message"]
+      },
+      "ReadingQuality": {
+        "type": "object",
+        "properties": {
+          "dataset_id": { "type": "string", "format": "uuid" },
+          "window_end": { "type": "string", "format": "date-time" },
+          "thresholds": { "$ref": "#/components/schemas/ReadingQualityThresholds" },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "readings": { "type": "integer", "minimum": 0 },
+              "deduplicated_readings": { "type": "integer", "minimum": 0 },
+              "duplicate_readings": { "type": "integer", "minimum": 0 },
+              "meters_with_readings": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["readings", "deduplicated_readings", "duplicate_readings", "meters_with_readings"]
+          },
+          "silent_meters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "meter_id": { "type": "string" },
+                "last_interval_start": { "type": "string", "format": "date-time" },
+                "hours_since_last_reading": { "type": "number", "minimum": 0 }
+              },
+              "required": ["meter_id", "last_interval_start", "hours_since_last_reading"]
+            }
+          },
+          "frozen_meters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "meter_id": { "type": "string" },
+                "unique_values": { "type": "integer", "minimum": 1 },
+                "reading_count": { "type": "integer", "minimum": 1 },
+                "unique_ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+              },
+              "required": ["meter_id", "unique_values", "reading_count", "unique_ratio"]
+            }
+          },
+          "unit_check": {
+            "type": ["object", "null"],
+            "properties": {
+              "evaluated_meters": { "type": "integer", "minimum": 0 },
+              "suspected_meters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "meter_id": { "type": "string" },
+                    "customer_type": { "type": "string" },
+                    "meter_median_kwh": { "type": "number" },
+                    "customer_type_median_kwh": { "type": "number", "exclusiveMinimum": 0 },
+                    "ratio": { "type": ["number", "null"] }
+                  },
+                  "required": ["meter_id", "customer_type", "meter_median_kwh", "customer_type_median_kwh", "ratio"]
+                }
+              }
+            },
+            "required": ["evaluated_meters", "suspected_meters"]
+          }
+        },
+        "required": ["dataset_id", "window_end", "thresholds", "counts", "silent_meters", "frozen_meters", "unit_check"]
+      }
+    }
+  }
+}

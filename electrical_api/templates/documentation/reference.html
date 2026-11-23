@@ -1,0 +1,112 @@
+{% extends "documentation/base.html" %}
+{% from "documentation/parts.html" import code_sample, field_table %}
+{% block title %}Довідник API{% endblock %}
+{% block contents %}
+<a href="#start">Початок роботи</a>
+{% for group in groups %}<a href="#{{ group.key }}">{{ group.title }}</a>{% endfor %}
+{% endblock %}
+{% block body %}
+<header class="hero">
+  <p class="hero-meta">HTTP API <span aria-hidden="true">/</span> OpenAPI {{ openapi_version }}</p>
+  <h1>Довідник API</h1>
+  <p class="intro">Імпортуйте набір даних і викликайте потрібний аналіз. Для кожного маршруту наведено параметри запиту, приклад виклику й можливі відповіді.</p>
+</header>
+
+<section id="start" class="quickstart">
+  <h2>Початок роботи</h2>
+  <ol>
+    <li>Підготуйте <a href="{{ url_for('documentation.input_data') }}">JSON або NDJSON</a> за схемою v1.</li>
+    <li>Надішліть <a href="#importDataset"><code>POST /v1/datasets</code></a> і збережіть <code>dataset_id</code> із відповіді <code>201</code>.</li>
+    <li>Для прикладів PowerShell задайте <code>$id</code> рівним отриманому <code>dataset_id</code>. Потім викличте потрібний <code>GET</code>.</li>
+  </ol>
+</section>
+
+<div class="filter" hidden>
+  <label for="route-filter">Знайти маршрут</label>
+  <input type="search" id="route-filter" placeholder="Назва, шлях або метод" autocomplete="off" data-route-filter>
+  <p class="filter-status" aria-live="polite" data-filter-status></p>
+</div>
+
+{% for group in groups %}
+<section id="{{ group.key }}" class="route-group" data-route-group>
+  <h2>{{ group.title }}</h2>
+  <div class="route-list">
+  {% for route in group.operations %}
+    <details id="{{ route.id }}" class="route" data-route{% if route.method == "POST" %} open{% endif %}>
+      <summary>
+        <span class="method{% if route.method == 'POST' %} method-post{% endif %}">{{ route.method }}</span>
+        <span class="route-heading">
+          <code>{{ route.path }}</code>
+          <span>{{ route.summary }}</span>
+        </span>
+        <span class="chevron" aria-hidden="true"></span>
+      </summary>
+      <div class="route-body">
+        {% if route.purpose %}<p>{{ route.purpose }}</p>{% endif %}
+        {% if route.records %}
+        <p class="record-links">Типи записів
+          {% for record in route.records %}
+          <a href="{{ url_for('documentation.input_data', _anchor=record) }}"><code>{{ record }}</code></a>
+          {% endfor %}
+        </p>
+        {% endif %}
+        {% if route.formats %}
+        <p class="record-links">Формати тіла
+          {% for format in route.formats %}<code>{{ format }}</code>{% endfor %}
+          <a href="{{ url_for('documentation.input_data', _anchor='formats') }}">Переглянути приклади</a>
+        </p>
+        {% endif %}
+        {% if route.parameters %}
+        <h3>Параметри</h3>
+        <div class="table-scroll" role="region" aria-label="Параметри {{ route.summary }}" tabindex="0">
+          <table>
+            <thead><tr>
+              <th scope="col">Назва</th><th scope="col">Де передається</th><th scope="col">Тип</th>
+              <th scope="col">Обов’язковий</th><th scope="col">Опис і обмеження</th>
+            </tr></thead>
+            <tbody>
+              {% for parameter in route.parameters %}
+              <tr>
+                <th scope="row"><code>{{ parameter.name }}</code></th>
+                <td>{{ parameter.location }}</td>
+                <td><code class="type">{{ parameter.kind }}</code></td>
+                <td><span class="requirement{% if parameter.required == 'Так' %} required{% endif %}">{{ parameter.required }}</span></td>
+                <td>
+                  {{ parameter.description }}
+                  {% for limit in parameter.limits %}<span class="constraint"><code>{{ limit }}</code></span>{% endfor %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+        {{ code_sample(route.command, "Приклад · PowerShell") }}
+        <h3>Відповіді</h3>
+        <div class="table-scroll" role="region" aria-label="Статуси {{ route.summary }}" tabindex="0">
+          <table>
+            <thead><tr><th scope="col">HTTP</th><th scope="col">Значення</th><th scope="col">Тип вмісту</th></tr></thead>
+            <tbody>
+              {% for response in route.responses %}
+              <tr>
+                <th scope="row"><span class="status{% if response.success %} status-success{% endif %}">{{ response.status }}</span></th>
+                <td>{{ response.description }}</td>
+                <td>{% for format in response.formats %}<code class="content-type">{{ format }}</code>{% endfor %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% for response in route.responses if response.fields %}
+        <details class="response-fields">
+          <summary>Поля відповіді {{ response.status }}</summary>
+          {{ field_table(response.fields, "Поля відповіді " ~ response.status) }}
+        </details>
+        {% endfor %}
+      </div>
+    </details>
+  {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

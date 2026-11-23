@@ -1,0 +1,38 @@
+{% macro code_sample(value, label) %}
+<div class="sample">
+  <div class="sample-header">
+    <span>{{ label }}</span>
+    <button type="button" class="copy-button" data-copy hidden>Копіювати</button>
+  </div>
+  <pre><code>{{ value }}</code></pre>
+</div>
+{% endmacro %}
+
+{% macro field_table(rows, name, show_examples=false) %}
+<div class="table-scroll" role="region" aria-label="{{ name }}" tabindex="0">
+  <table>
+    <thead><tr>
+      <th scope="col">Поле</th>
+      <th scope="col">Тип</th>
+      <th scope="col">Обов’язкове</th>
+      {% if show_examples %}<th scope="col">Приклад</th>{% endif %}
+      <th scope="col">Опис і обмеження</th>
+    </tr></thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <th scope="row"><code>{{ row.name }}</code></th>
+        <td><code class="type">{{ row.kind }}</code></td>
+        <td><span class="requirement{% if row.required == 'Так' %} required{% endif %}">{{ row.required }}</span></td>
+        {% if show_examples %}<td>{% if row.example %}<code>{{ row.example }}</code>{% else %}—{% endif %}</td>{% endif %}
+        <td>
+          {% if row.description %}{{ row.description }}{% endif %}
+          {% for limit in row.limits %}<span class="constraint"><code>{{ limit }}</code></span>{% endfor %}
+          {% if not row.description and not row.limits %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endmacro %}
