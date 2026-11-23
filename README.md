@@ -1,6 +1,6 @@
 # ElectricalAnalysisAPI
 
-Python-сервіс для імпорту наборів електрообліку за контрактом v1. Специфікація HTTP міститься у docs/openapi.json, опис полів — у docs/data-contract.md.
+Python-сервіс для імпорту наборів електрообліку v1. Специфікація HTTP міститься у docs/openapi.json, опис полів — у docs/data-contract.md.
 
 ## Структура Python-коду
 
